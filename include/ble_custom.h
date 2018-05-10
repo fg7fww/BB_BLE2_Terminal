@@ -43,16 +43,10 @@ extern "C"
                                           0xb5, 0xf3, 0x93, 0xe0 }
 #define CS_CHARACTERISTIC_TX_UUID       { 0x24, 0xdc, 0x0e, 0x6e, 0x02, 0x40, \
                                           0xca, 0x9e, 0xe5, 0xa9, 0xa3, 0x00, \
-                                          0xb5, 0xf3, 0x93, 0xe0 }
+                                          0xb6, 0xf3, 0x93, 0xe0 }
 #define CS_CHARACTERISTIC_RX_UUID       { 0x24, 0xdc, 0x0e, 0x6e, 0x03, 0x40, \
                                           0xca, 0x9e, 0xe5, 0xa9, 0xa3, 0x00, \
-                                          0xb5, 0xf3, 0x93, 0xe0 }
-#define CS_CHARACTERISTIC_TX_LONG_UUID  { 0x24, 0xdc, 0x0e, 0x6e, 0x04, 0x40, \
-                                          0xca, 0x9e, 0xe5, 0xa9, 0xa3, 0x00, \
-                                          0xb5, 0xf3, 0x93, 0xe0 }
-#define CS_CHARACTERISTIC_RX_LONG_UUID  { 0x24, 0xdc, 0x0e, 0x6e, 0x05, 0x40, \
-                                          0xca, 0x9e, 0xe5, 0xa9, 0xa3, 0x00, \
-                                          0xb5, 0xf3, 0x93, 0xe0 }
+                                          0xb7, 0xf3, 0x93, 0xe0 }
 
 #define ATT_DECL_CHAR() \
     { ATT_DECL_CHARACTERISTIC_128, PERM(RD, ENABLE), 0, 0 }
@@ -83,16 +77,6 @@ enum cs_idx_att
     CS_IDX_RX_VALUE_CCC,
     CS_IDX_RX_VALUE_USR_DSCP,
 
-    /* TX Long Characteristic */
-    CS_IDX_TX_LONG_VALUE_CHAR,
-    CS_IDX_TX_LONG_VALUE_VAL,
-    CS_IDX_TX_LONG_VALUE_USR_DSCP,
-
-    /* RX Long Characteristic */
-    CS_IDX_RX_LONG_VALUE_CHAR,
-    CS_IDX_RX_LONG_VALUE_VAL,
-    CS_IDX_RX_LONG_VALUE_USR_DSCP,
-
     /* Max number of characteristics */
     CS_IDX_NB,
 };
@@ -100,13 +84,9 @@ enum cs_idx_att
 #define CS_TX_VALUE_MAX_LENGTH          20
 #define CS_RX_VALUE_MAX_LENGTH          20
 #define CS_USER_DESCRIPTION_MAX_LENGTH  16
-#define CS_TX_LONG_VALUE_MAX_LENGTH     40
-#define CS_RX_LONG_VALUE_MAX_LENGTH     40
 
 #define CS_TX_CHARACTERISTIC_NAME       "TX_VALUE"
 #define CS_RX_CHARACTERISTIC_NAME       "RX_VALUE"
-#define CS_TX_LONG_CHARACTERISTIC_NAME  "TX_LONG_VALUE"
-#define CS_RX_LONG_CHARACTERISTIC_NAME  "RX_LONG_VALUE"
 
 /* List of message handlers that are used by the custom service
  * application manager */
@@ -154,16 +134,11 @@ struct cs_env_tag
     /* CCCD value of RX characteristic */
     uint16_t rx_cccd_value;
 
-    uint8_t tx_long_value[CS_TX_LONG_VALUE_MAX_LENGTH];
-
-    uint8_t rx_long_value[CS_RX_LONG_VALUE_MAX_LENGTH];
-
     /* A flag that indicates that RX value has been changed, to be used by
      * application */
     bool rx_value_changed;
     uint16_t rx_size;
 
-    bool rx_long_value_changed;
     /* The state machine for service discovery
      * (it is not used for server role) */
     uint8_t state;

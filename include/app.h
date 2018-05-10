@@ -54,6 +54,7 @@ extern "C"
 #include "ble_bass.h"
 #include "spi_interface.h"
 
+
 /* ----------------------------------------------------------------------------
  * Defines
  * --------------------------------------------------------------------------*/
@@ -125,8 +126,8 @@ struct app_env_tag
     uint8_t batt_lvl;
     uint32_t sum_batt_lvl;
     uint16_t num_batt_read;
-    uint8_t spi1_rx_value[60];
-    uint8_t spi1_tx_value[60];
+    uint8_t spi1_rx_value[CS_TX_VALUE_MAX_LENGTH];
+    uint8_t spi1_tx_value[CS_TX_VALUE_MAX_LENGTH];
     bool send_batt_ntf[NUM_MASTERS];
 };
 

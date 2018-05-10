@@ -82,7 +82,7 @@ extern "C"
 
 /* Set the device name */
 #define APP_DEVICE_NAME_LENGTH_MAX      20
-#define APP_DFLT_DEVICE_NAME            "BB_BLE2_Terminal"
+#define APP_DFLT_DEVICE_NAME            "BB_BLE_Terminal"
 #define APP_DEVICE_NAME_FLAG            '\x09'
 
 /* ON SEMICONDUCTOR Company ID */

@@ -26,6 +26,7 @@
 
 #include "app.h"
 
+
 int main(void)
 {
     App_Initialize();
@@ -50,47 +51,6 @@ int main(void)
                                          app_env.batt_lvl, 0);
                 }
 
-                /* Update custom service characteristics, send notifications if
-                 * notification is enabled */
-                /*
-                if (cs_env[i].tx_value_changed && cs_env[i].sent_success)
-                {
-                    cs_env[i].tx_value_changed = false;
-                    (cs_env[i].val_notif)++;
-
-                    if (cs_env[i].tx_cccd_value & ATT_CCC_START_NTF)
-                    {
-                        memset(cs_env[i].tx_value, cs_env[i].val_notif,
-                               CS_TX_VALUE_MAX_LENGTH);
-                        CustomService_SendNotification(ble_env[i].conidx,
-                                                       CS_IDX_TX_VALUE_VAL,
-                                                       &cs_env[i].tx_value[0],
-                                                       CS_TX_VALUE_MAX_LENGTH);
-                    }
-                }
-				*/
-                /* Update TX long characteristic if new RX long characteristic was received.
-                 * Write the inverted version of RX characteristic into TX */
-                if (cs_env[i].rx_long_value_changed == true)
-                {
-                    for (unsigned int j = 0; j < CS_RX_LONG_VALUE_MAX_LENGTH; j++)
-                    {
-                        cs_env[i].tx_long_value[j] = 0xFF ^ cs_env[i].rx_long_value[j];
-                    }
-                    cs_env[i].rx_long_value_changed = false;
-                }
-
-                if (cs_env[i].tx_value_changed)
-                {
-                    cs_env[i].tx_value_changed = false;
-
-                    CustomService_SendNotification(ble_env[i].conidx,
-                                                       CS_IDX_TX_VALUE_VAL,
-                                                       &cs_env[i].tx_value[0],
-                                                       cs_env[i].tx_size);
-
-                }
-
                 /*  SPI_IF */
                 // Set new message to be sent to Master.
                 // If received message is available && there is no message being sent.
@@ -113,6 +73,18 @@ int main(void)
                 }
 
                 /* SPI_IF END */
+
+                /* Send notification over TX characteristic. */
+                if (cs_env[i].tx_value_changed)
+                {
+                    cs_env[i].tx_value_changed = false;
+
+                    CustomService_SendNotification(ble_env[i].conidx,
+                                                       CS_IDX_TX_VALUE_VAL,
+                                                       &cs_env[i].tx_value[0],
+                                                       cs_env[i].tx_size);
+
+                }
             }
         }
 

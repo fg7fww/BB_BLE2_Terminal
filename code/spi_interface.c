@@ -21,7 +21,7 @@ extern void SPI_IF_Init(void)
 	spi_if.tx_msg_len = 0;
 	spi_if.rx_msg_len = 0;
 	spi_if.tx_msg_pos = 0;
-	spi_if.buf_len = 20;
+	spi_if.buf_len = CS_TX_VALUE_MAX_LENGTH;
 
 	// Configure pins for use by SPI1.
 	Sys_SPI_DIOConfig(SPI_IF_SPI_ID,

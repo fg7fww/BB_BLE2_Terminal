@@ -24,8 +24,6 @@ struct cs_env_tag cs_env[NUM_MASTERS];
 const uint32_t cs_atts_len[] = {
     [CS_IDX_TX_VALUE_VAL] = CS_TX_VALUE_MAX_LENGTH,
     [CS_IDX_RX_VALUE_VAL] = CS_RX_VALUE_MAX_LENGTH,
-    [CS_IDX_TX_LONG_VALUE_VAL] = CS_TX_LONG_VALUE_MAX_LENGTH,
-    [CS_IDX_RX_LONG_VALUE_VAL] = CS_RX_LONG_VALUE_MAX_LENGTH,
 };
 
 /* ----------------------------------------------------------------------------
@@ -97,24 +95,6 @@ void CustomService_ServiceAdd(void)
 
         [CS_IDX_RX_VALUE_CCC]      = ATT_DECL_CHAR_CCC(),
         [CS_IDX_RX_VALUE_USR_DSCP] = ATT_DECL_CHAR_USER_DESC(CS_USER_DESCRIPTION_MAX_LENGTH),
-
-        /* TX long Characteristic */
-        [CS_IDX_TX_LONG_VALUE_CHAR] = ATT_DECL_CHAR(),
-
-        [CS_IDX_TX_LONG_VALUE_VAL]  = ATT_DECL_CHAR_UUID_128(CS_CHARACTERISTIC_TX_LONG_UUID,
-                                                             PERM(RD, ENABLE), CS_TX_LONG_VALUE_MAX_LENGTH),
-
-        [CS_IDX_TX_LONG_VALUE_USR_DSCP] = ATT_DECL_CHAR_USER_DESC(CS_USER_DESCRIPTION_MAX_LENGTH),
-
-        /* RX long Characteristic */
-        [CS_IDX_RX_LONG_VALUE_CHAR]     = ATT_DECL_CHAR(),
-
-        [CS_IDX_RX_LONG_VALUE_VAL]      = ATT_DECL_CHAR_UUID_128(CS_CHARACTERISTIC_RX_LONG_UUID,
-                                                                 PERM(RD, ENABLE) | PERM(WRITE_REQ, ENABLE)
-                                                                 | PERM(WRITE_COMMAND, ENABLE),
-                                                                 CS_RX_LONG_VALUE_MAX_LENGTH),
-
-        [CS_IDX_RX_LONG_VALUE_USR_DSCP] = ATT_DECL_CHAR_USER_DESC(CS_USER_DESCRIPTION_MAX_LENGTH),
     };
 
     /* Fill the add custom service message */
@@ -274,36 +254,6 @@ int GATTC_ReadReqInd(ke_msg_id_t const msg_id,
             }
             break;
 
-            /* RX long characteristic*/
-            case CS_IDX_RX_LONG_VALUE_VAL:
-            {
-                length = CS_RX_LONG_VALUE_MAX_LENGTH;
-                valptr = (uint8_t *)&cs_env[device_indx].rx_long_value;
-            }
-            break;
-
-            case CS_IDX_RX_LONG_VALUE_USR_DSCP:
-            {
-                length = strlen(CS_RX_LONG_CHARACTERISTIC_NAME);
-                valptr = (uint8_t *)CS_RX_LONG_CHARACTERISTIC_NAME;
-            }
-            break;
-
-            /* TX long characteristic */
-            case CS_IDX_TX_LONG_VALUE_VAL:
-            {
-                length = CS_TX_LONG_VALUE_MAX_LENGTH;
-                valptr = (uint8_t *)&cs_env[device_indx].tx_long_value;
-            }
-            break;
-
-            case CS_IDX_TX_LONG_VALUE_USR_DSCP:
-            {
-                length = strlen(CS_TX_LONG_CHARACTERISTIC_NAME);
-                valptr = (uint8_t *)CS_TX_LONG_CHARACTERISTIC_NAME;
-            }
-            break;
-
             default:
             {
                 status = ATT_ERR_READ_NOT_PERMITTED;
@@ -412,13 +362,6 @@ int GATTC_WriteReqInd(ke_msg_id_t const msg_id,
             case CS_IDX_TX_VALUE_CCC:
             {
                 valptr = (uint8_t *)&cs_env[device_indx].tx_cccd_value;
-            }
-            break;
-
-            case CS_IDX_RX_LONG_VALUE_VAL:
-            {
-                valptr = (uint8_t *)&cs_env[device_indx].rx_long_value;
-                cs_env[device_indx].rx_long_value_changed = 1;
             }
             break;
 
@@ -573,8 +516,7 @@ int GATTC_AttInfoReqInd(ke_msg_id_t const msg_id,
                      KE_BUILD_ID(TASK_GATTC, ble_env[device_indx].conidx),
                      TASK_APP, gattc_att_info_cfm);
 
-    if (attnum == CS_IDX_RX_VALUE_VAL ||
-        attnum == CS_IDX_RX_LONG_VALUE_VAL)
+    if (attnum == CS_IDX_RX_VALUE_VAL)
     {
         cfm->handle = param->handle;
         cfm->length = cs_atts_len[attnum];
