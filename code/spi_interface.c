@@ -52,10 +52,11 @@ extern void SPI_IF_Init(void)
 	Sys_DIO_Config(SPI_IF_PIN_MISO,
 			       DIO_MODE_INPUT | DIO_WEAK_PULL_UP | DIO_LPF_DISABLE);
 
-	// Set interrupt pin to signal master that message was received.
+	// Interrupt pin to signal master that message was received.
+	// IDLE -> HIGH
+	// Shared with LED
 	Sys_DIO_Config(SPI_IF_PIN_INT,
-			       DIO_WEAK_PULL_UP | DIO_MODE_GPIO_OUT_1);
-	Sys_GPIO_Set_High(SPI_IF_PIN_INT);
+			       DIO_NO_PULL | DIO_MODE_GPIO_OUT_1);
 
 	NVIC_EnableIRQ(SPI1_RX_IRQn);
 	//NVIC_EnableIRQ(SPI1_TX_IRQn);
@@ -74,11 +75,19 @@ void SPI_IF_SetMessage(const char *msg, size_t msg_len)
 		msg_len = spi_if.buf_len;
 	}
 
-	memcpy(spi_if.tx_buf, msg, msg_len);
-	spi_if.tx_msg_len = msg_len;
-	spi_if.tx_msg_pos = 0;
-	// Signal Master that we have new message.
-	Sys_GPIO_Set_Low(SPI_IF_PIN_INT);
+	if (msg_len != 0)
+	{
+		// Wait for buffer to be emptied
+		while (spi_if.tx_msg_len != 0);
+
+		// Copy buffer data
+		memcpy(spi_if.tx_buf, msg, msg_len);
+		spi_if.tx_msg_len = msg_len;
+		spi_if.tx_msg_pos = 0;
+
+		// Signal Master that we have new message.
+		Sys_GPIO_Set_Low(SPI_IF_PIN_INT);
+	}
 }
 
 uint32_t SPI_IF_GetMessage(uint8_t *msg, uint16_t *msg_len)
@@ -124,6 +133,8 @@ extern void DIO0_IRQHandler(void)
 		// CS enabled -> Set as SPI serial output.
 		Sys_DIO_Config(SPI_IF_PIN_MISO,
 				       DIO_MODE_SPI1_SERO);
+
+		Sys_GPIO_Set_High(SPI_IF_PIN_INT);
 	}
 	else
 	{
@@ -132,6 +143,15 @@ extern void DIO0_IRQHandler(void)
 				       DIO_MODE_INPUT | DIO_WEAK_PULL_UP | DIO_LPF_DISABLE);
 
 		spi_if.state = SPI_IF_STATE_IDLE;
+
+		if (spi_if.tx_msg_len != 0)
+		{
+			Sys_GPIO_Set_Low(SPI_IF_PIN_INT);
+		}
+		else
+		{
+			Sys_GPIO_Set_High(SPI_IF_PIN_INT);
+		}
 	}
 }
 
@@ -164,8 +184,6 @@ extern void SPI1_RX_IRQHandler(void)
 				case SPI_IF_CMD_RECV:
 				{
 					spi_if.state = SPI_IF_STATE_RECV_REQ;
-					// Clear pending message signal.
-					Sys_GPIO_Set_High(SPI_IF_PIN_INT);
 					// Send first character of received message.
 					const uint32_t tx_data = SPI_IF_GetRecvByte();
 					SPI1->TX_DATA = tx_data;
@@ -219,8 +237,6 @@ extern void SPI1_RX_IRQHandler(void)
 			{
 				spi_if.state = SPI_IF_STATE_IDLE;
 				SPI1->TX_DATA = 0;
-				// Signal Master that there are still characters left.
-				Sys_GPIO_Set_Low(SPI_IF_PIN_INT);
 			}
 			else
 			{
@@ -231,8 +247,6 @@ extern void SPI1_RX_IRQHandler(void)
 				{
 					// Go back to IDLE if reached end of message.
 					spi_if.state = SPI_IF_STATE_IDLE;
-					// Make sure INT signal is off.
-					Sys_GPIO_Set_High(SPI_IF_PIN_INT);
 				}
 			}
 		} break;

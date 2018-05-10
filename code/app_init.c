@@ -100,9 +100,6 @@ void App_Initialize(void)
                               (ADC_NEG_INPUT_GND |
                                ADC_POS_INPUT_VBAT_DIV2));
 
-    /* Configure DIOs */
-    Sys_DIO_Config(LED_DIO_NUM, DIO_MODE_GPIO_OUT_0);
-
     /* Configure SPI Interface */
     SPI_IF_Init();
 

@@ -87,8 +87,7 @@ typedef void (*appm_add_svc_func_t)(void);
 
 /* List of message handlers that are used by the different profiles/services */
 #define APP_MESSAGE_HANDLER_LIST                       \
-    DEFINE_MESSAGE_HANDLER(APP_TEST_TIMER, APP_Timer), \
-    DEFINE_MESSAGE_HANDLER(LED_TIMER, LED_Timer)
+    DEFINE_MESSAGE_HANDLER(APP_TEST_TIMER, APP_Timer)
 
 /* List of functions used to create the database */
 #define SERVICE_ADD_FUNCTION_LIST                        \

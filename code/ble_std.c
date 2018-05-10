@@ -422,9 +422,6 @@ int GAPM_CmpEvt(ke_msg_id_t const msg_id,
                 /* Start a timer to be used as a periodic tick timer for
                  * application */
                 ke_timer_set(APP_TEST_TIMER, TASK_APP, TIMER_200MS_SETTING);
-
-                /* Start LED timer */
-                ke_timer_set(LED_TIMER, TASK_APP, TIMER_200MS_SETTING);
             }
         }
         break;

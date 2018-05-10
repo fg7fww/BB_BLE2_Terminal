@@ -74,23 +74,8 @@ int APP_Timer(ke_msg_id_t const msg_id,
     uint16_t level;
 
     /* Restart timer */
-    ke_timer_set(APP_TEST_TIMER, TASK_APP, TIMER_200MS_SETTING);
+    ke_timer_set(APP_TEST_TIMER, TASK_APP, TIMER_2S_SETTING);
 
-    /* Every six seconds report that the custom service TX value changed
-     * (notification simulation) */
-    for (unsigned int i = 0; i < NUM_MASTERS; i++)
-    {
-        /* If the server is connected to a peer */
-        if (ble_env[i].state == APPM_CONNECTED)
-        {
-            cs_env[i].cnt_notifc++;
-            if (cs_env[i].cnt_notifc == 30)
-            {
-                cs_env[i].tx_value_changed = true;
-                cs_env[i].cnt_notifc = 0;
-            }
-        }
-    }
 
     /* Calculate the battery level as a percentage, scaling the battery
      * voltage between 1.4V (max) and 1.1V (min) */
@@ -117,106 +102,6 @@ int APP_Timer(ke_msg_id_t const msg_id,
 
         app_env.num_batt_read = 0;
         app_env.sum_batt_lvl = 0;
-    }
-
-    return (KE_MSG_CONSUMED);
-}
-
-/* ----------------------------------------------------------------------------
- * Function      : int LED_Timer(ke_msg_idd_t const msg_id,
- *                               void const *param,
- *                               ke_task_id_t const dest_id,
- *                               ke_task_id_t const src_id)
- * ----------------------------------------------------------------------------
- * Description   : Control GPIO "LED_DIO_NUM" behavior using a timer.
- *                 Possible LED behaviors:
- *                     - If the device has not started advertising: the LED
- *                       is off.
- *                     - If the device is advertising but it has not connected
- *                       to any peer: the LED blinks every 200 ms.
- *                     - If the device is advertising and it is connecting to
- *                       fewer than NUM_MASTERS peers: the LED blinks every 2
- *                       seconds according to the number of connected peers
- *                       (i.e., blinks once if one peer is connected, twice if
- *                       two peers are connected, etc.).
- *                     - If the device is connecting to NUM_MASTERS peers (it
- *                       stopped advertising): the LED is steady on.
- * Inputs        : - msg_id     - Kernel message ID number
- *                 - param      - Message parameter (unused)
- *                 - dest_id    - Destination task ID number
- *                 - src_id     - Source task ID number
- * Outputs       : return value - Indicate if the message was consumed;
- *                                compare with KE_MSG_CONSUMED
- * Assumptions   : None
- * ------------------------------------------------------------------------- */
-int LED_Timer(ke_msg_id_t const msg_id,
-              void const *param,
-              ke_task_id_t const dest_id,
-              ke_task_id_t const src_id)
-{
-    static uint8_t toggle_cnt = 0;
-    uint8_t connected_peer_num = Connected_Peer_Num();
-
-    if (ble_env[0].state < APPM_ADVERTISING)
-    {
-        Sys_GPIO_Set_Low(LED_DIO_NUM);
-
-        /* Reschedule timer */
-        ke_timer_set(LED_TIMER, TASK_APP, TIMER_200MS_SETTING);
-
-        return (KE_MSG_CONSUMED);
-    }
-
-    /* Blink LED according to the number of connections */
-    switch (connected_peer_num)
-    {
-        case 0:
-        {
-            /* Reschedule timer */
-            ke_timer_set(LED_TIMER, TASK_APP, TIMER_200MS_SETTING);
-
-            /* Toggle LED_DIO_NUM every 200ms */
-            Sys_GPIO_Toggle(LED_DIO_NUM);
-
-            toggle_cnt = 0;
-        }
-        break;
-
-        case NUM_MASTERS:
-        {
-            /* Reschedule timer */
-            ke_timer_set(LED_TIMER, TASK_APP, TIMER_200MS_SETTING);
-
-            /* LED_DIO_NUM steady high */
-            Sys_GPIO_Set_High(LED_DIO_NUM);
-
-            toggle_cnt = 0;
-        }
-        break;
-
-        default:
-
-            /* connected_peer_num is between 1 and NUM_MASTERS (exclusive) */
-            if (toggle_cnt >= connected_peer_num * 2)
-            {
-                toggle_cnt = 0;
-
-                /* Schedule timer for 2s later*/
-                ke_timer_set(LED_TIMER, TASK_APP, TIMER_2S_SETTING);
-
-                /* LED_DIO_NUM steady high until next 2s blinking period */
-                Sys_GPIO_Set_High(LED_DIO_NUM);
-            }
-            else
-            {
-                toggle_cnt++;
-
-                /* Toggle LED_DIO_NUM */
-                Sys_GPIO_Toggle(LED_DIO_NUM);
-
-                /* Schedule timer for 200ms later*/
-                ke_timer_set(LED_TIMER, TASK_APP, TIMER_200MS_SETTING);
-            }
     }
 
     return (KE_MSG_CONSUMED);
