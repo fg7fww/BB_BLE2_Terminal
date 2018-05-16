@@ -1,0 +1,17 @@
+# BB_BLE_Terminal v1.1
+
+## Changes
+
+* Rebuild in newer EDK environment to enhance connection stability with smartphones using Android versions 6+.
+
+## Known Issues
+
+* Disconnect issues with smartphones using Android versions 7.1.x
+
+
+
+# BB_BLE_Terminal v1.0
+
+## Changes
+
+* Initial Release
